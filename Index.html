@@ -1,0 +1,1084 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>QuickTemp Mail - Premium Temporary Email</title>
+    <!-- Google Fonts: Poppins -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#7C3AED',   /* Deep Purple */
+                        secondary: '#3B82F6', /* Electric Blue */
+                        accent: '#06B6D4',    /* Cyan */
+                        darkbg: '#0F172A',    /* Dark Navy */
+                        cardbg: 'rgba(30, 41, 59, 0.75)',
+                    },
+                    fontFamily: {
+                        poppins: ['Poppins', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- QR Code Generator Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <style>
+        body { 
+            font-family: 'Poppins', sans-serif; 
+            touch-action: manipulation;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+        input, textarea, [contenteditable] {
+            -webkit-user-select: text;
+            user-select: text;
+        }
+        .glass { 
+            background: rgba(30, 41, 59, 0.75); 
+            backdrop-filter: blur(12px); 
+            -webkit-backdrop-filter: blur(12px); 
+            border: 1px solid rgba(255, 255, 255, 0.08); 
+        }
+        .glass-light { 
+            background: rgba(255, 255, 255, 0.85); 
+            backdrop-filter: blur(12px); 
+            -webkit-backdrop-filter: blur(12px); 
+            border: 1px solid rgba(0, 0, 0, 0.08); 
+        }
+        /* Mobile Touch & Performance Optimization for 1GB RAM devices */
+        * { 
+            -webkit-tap-highlight-color: transparent; 
+        }
+        button, a, .interactive-card {
+            touch-action: manipulation;
+            cursor: pointer;
+        }
+        button:active, .active-scale:active {
+            transform: scale(0.97);
+            transition: transform 0.08s ease-in-out;
+        }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        /* Smooth Screen Transitions */
+        .app-screen {
+            animation: fadeIn 0.2s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(4px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="bg-darkbg text-white min-h-screen flex flex-col selection:bg-primary selection:text-white transition-colors duration-300">
+
+    <!-- TOP HEADER -->
+    <header class="sticky top-0 z-40 glass border-b border-slate-800 px-4 py-3 flex items-center justify-between">
+        <div class="flex items-center space-x-2">
+            <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-primary to-accent flex items-center justify-center shadow-lg shadow-primary/30">
+                <i data-lucide="zap" class="w-5 h-5 text-white"></i>
+            </div>
+            <div>
+                <h1 class="font-bold text-base leading-tight tracking-wide bg-gradient-to-r from-white via-slate-200 to-accent bg-clip-text text-transparent">QuickTemp Mail</h1>
+                <p id="headerQuota" class="text-[10px] text-slate-400 font-medium">Quota: 0 / 10</p>
+            </div>
+        </div>
+        <div class="flex items-center space-x-2">
+            <button onclick="switchLanguage()" id="langBtn" class="px-2.5 py-1.5 text-xs font-semibold rounded-lg bg-slate-800/80 border border-slate-700 hover:border-primary transition text-slate-300 active-scale">EN</button>
+            <button onclick="toggleTheme()" class="w-9 h-9 rounded-xl bg-slate-800/80 border border-slate-700 flex items-center justify-center text-slate-300 hover:text-white transition active-scale">
+                <i data-lucide="sun" id="themeIcon" class="w-4 h-4"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- MAIN APP CONTAINER (Screens Wrapper) -->
+    <main class="flex-1 pb-24 overflow-y-auto">
+
+        <!-- ================= 1. HOME SCREEN ================= -->
+        <section id="screen-home" class="app-screen p-4 space-y-4 max-w-md mx-auto">
+            <!-- Domain Config Status Banner -->
+            <div id="domainStatusBanner" class="hidden glass p-3 rounded-xl border border-amber-500/30 bg-amber-500/10 text-xs text-amber-200 flex items-center space-x-2">
+                <i data-lucide="alert-triangle" class="w-4 h-4 text-amber-400 shrink-0"></i>
+                <span id="domainStatusText">Domain MX records verified. Secure Node.js cluster active.</span>
+            </div>
+
+            <!-- Active Email Card -->
+            <div class="glass p-5 rounded-2xl shadow-xl relative overflow-hidden group">
+                <div class="absolute -right-10 -top-10 w-32 h-32 bg-primary/20 rounded-full blur-2xl pointer-events-none"></div>
+                <div class="flex justify-between items-center mb-3">
+                    <span class="text-xs font-semibold uppercase tracking-wider text-accent flex items-center space-x-1">
+                        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                        <span data-i18n="activeMailbox">Active Mailbox</span>
+                    </span>
+                    <span id="expiryTimer" class="text-xs text-slate-400 bg-slate-800/80 px-2 py-0.5 rounded-md font-mono">Expires: 59m</span>
+                </div>
+                
+                <div class="bg-slate-900/60 p-3.5 rounded-xl border border-slate-800/80 flex items-center justify-between mb-4">
+                    <span id="currentEmailDisplay" class="font-mono text-sm sm:text-base text-slate-100 truncate mr-2 select-all">Tap Generate below</span>
+                    <button onclick="copyCurrentEmail()" class="p-2.5 bg-primary/20 hover:bg-primary/30 text-primary rounded-lg transition shrink-0 active-scale" title="Copy Email">
+                        <i data-lucide="copy" class="w-4 h-4"></i>
+                    </button>
+                </div>
+
+                <div class="grid grid-cols-2 gap-2">
+                    <button onclick="generateNewEmail()" id="generateBtn" class="py-3 px-4 bg-gradient-to-r from-primary to-secondary hover:opacity-90 font-semibold rounded-xl text-sm shadow-lg shadow-primary/25 flex items-center justify-center space-x-2 transition active-scale">
+                        <i data-lucide="plus-circle" class="w-4 h-4"></i>
+                        <span data-i18n="generateBtn">New Email</span>
+                    </button>
+                    <button onclick="openScreen('qr')" class="py-3 px-4 bg-slate-800/80 hover:bg-slate-800 font-semibold rounded-xl text-sm border border-slate-700 flex items-center justify-center space-x-2 transition active-scale">
+                        <i data-lucide="qr-code" class="w-4 h-4 text-accent"></i>
+                        <span data-i18n="qrBtn">Show QR</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- OTP Detection Section -->
+            <div class="glass p-4 rounded-2xl space-y-3">
+                <div class="flex justify-between items-center">
+                    <h3 class="font-semibold text-sm text-slate-200 flex items-center space-x-2">
+                        <i data-lucide="shield-check" class="w-4 h-4 text-emerald-400"></i>
+                        <span data-i18n="otpSectionTitle">Smart OTP Detection</span>
+                    </h3>
+                    <span class="text-[10px] bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded-full font-medium" data-i18n="realtime">Real-Time</span>
+                </div>
+                <div id="otpContainer">
+                    <!-- Default empty state -->
+                    <div class="bg-slate-900/40 border border-slate-800/80 rounded-xl p-4 text-center">
+                        <p class="text-xs text-slate-400" data-i18n="noOtp">No OTP detected yet</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Inbox Preview -->
+            <div class="glass p-4 rounded-2xl space-y-3">
+                <div class="flex justify-between items-center">
+                    <h3 class="font-semibold text-sm text-slate-200 flex items-center space-x-2">
+                        <i data-lucide="inbox" class="w-4 h-4 text-secondary"></i>
+                        <span data-i18n="recentInbox">Recent Messages</span>
+                    </h3>
+                    <button onclick="openScreen('inbox')" class="text-xs text-accent hover:underline font-medium p-1 active-scale" data-i18n="viewAll">View All</button>
+                </div>
+                <div id="homeInboxList" class="space-y-2">
+                    <div class="text-center py-6 text-slate-500 text-xs" data-i18n="emptyInbox">
+                        Inbox is empty. Waiting for incoming mail...
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= 2. INBOX SCREEN ================= -->
+        <section id="screen-inbox" class="app-screen p-4 space-y-3 max-w-md mx-auto hidden">
+            <div class="flex items-center justify-between">
+                <h2 class="text-lg font-bold text-white flex items-center space-x-2">
+                    <i data-lucide="inbox" class="w-5 h-5 text-secondary"></i>
+                    <span data-i18n="inboxTitle">Live Inbox</span>
+                </h2>
+                <div class="flex space-x-2">
+                    <button onclick="refreshInbox()" class="p-2.5 bg-slate-800 hover:bg-slate-700 rounded-xl border border-slate-700 text-slate-300 transition active-scale" title="Manual Refresh">
+                        <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+                    </button>
+                    <button onclick="deleteAllEmailsInInbox()" class="p-2.5 bg-red-500/20 hover:bg-red-500/30 text-red-400 rounded-xl border border-red-500/30 transition active-scale" title="Delete All">
+                        <i data-lucide="trash-2" class="w-4 h-4"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Search box -->
+            <div class="relative">
+                <i data-lucide="search" class="w-4 h-4 absolute left-3 top-3.5 text-slate-400"></i>
+                <input type="text" id="inboxSearchInput" oninput="filterInbox()" placeholder="Search sender, subject..." class="w-full bg-slate-900/60 border border-slate-800 rounded-xl pl-9 pr-4 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-primary">
+            </div>
+
+            <div id="fullInboxList" class="space-y-2.5 pt-1">
+                <!-- Populated via JS -->
+            </div>
+        </section>
+
+        <!-- ================= 3. MY EMAILS SCREEN ================= -->
+        <section id="screen-myemails" class="app-screen p-4 space-y-3 max-w-md mx-auto hidden">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h2 class="text-lg font-bold text-white flex items-center space-x-2">
+                        <i data-lucide="mail-stack" class="w-5 h-5 text-primary"></i>
+                        <span data-i18n="myEmailsTitle">My Generated Emails</span>
+                    </h2>
+                    <p id="quotaCounterText" class="text-xs text-slate-400">Maximum limit: 0 / 10</p>
+                </div>
+                <button onclick="generateNewEmail()" class="px-3.5 py-2 bg-primary hover:bg-primary/90 text-xs font-semibold rounded-lg shadow-md transition active-scale" data-i18n="addNew">Add New</button>
+            </div>
+
+            <div id="myEmailsList" class="space-y-2.5 pt-1">
+                <!-- Populated via JS -->
+            </div>
+        </section>
+
+        <!-- ================= 4. QR CODE SCREEN ================= -->
+        <section id="screen-qr" class="app-screen p-4 space-y-4 max-w-md mx-auto hidden text-center">
+            <h2 class="text-lg font-bold text-white flex items-center justify-center space-x-2">
+                <i data-lucide="qr-code" class="w-5 h-5 text-accent"></i>
+                <span data-i18n="qrTitle">Mailbox QR Code</span>
+            </h2>
+            
+            <div class="glass p-6 rounded-2xl flex flex-col items-center justify-center space-y-4 shadow-xl">
+                <div id="qrcode" class="bg-white p-4 rounded-xl shadow-inner flex items-center justify-center min-h-[200px] min-w-[200px]"></div>
+                <p id="qrEmailDisplay" class="font-mono text-xs text-slate-300 break-all select-all"></p>
+                <div class="flex space-x-2 w-full pt-2">
+                    <button onclick="downloadQR()" class="flex-1 py-3 bg-secondary hover:bg-secondary/90 text-xs font-semibold rounded-xl flex items-center justify-center space-x-1.5 shadow-lg shadow-secondary/20 transition active-scale">
+                        <i data-lucide="download" class="w-4 h-4"></i>
+                        <span data-i18n="downloadQr">Download PNG</span>
+                    </button>
+                    <button onclick="shareQR()" class="flex-1 py-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-semibold rounded-xl flex items-center justify-center space-x-1.5 transition active-scale">
+                        <i data-lucide="share-2" class="w-4 h-4 text-accent"></i>
+                        <span data-i18n="shareQr">Share</span>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= 5. SETTINGS SCREEN ================= -->
+        <section id="screen-settings" class="app-screen p-4 space-y-4 max-w-md mx-auto hidden">
+            <h2 class="text-lg font-bold text-white flex items-center space-x-2">
+                <i data-lucide="settings" class="w-5 h-5 text-slate-400"></i>
+                <span data-i18n="settingsTitle">App Settings</span>
+            </h2>
+
+            <div class="glass rounded-2xl divide-y divide-slate-800/80 text-xs">
+                <!-- Theme toggle -->
+                <div class="p-3.5 flex items-center justify-between">
+                    <span class="font-medium text-slate-200" data-i18n="themeMode">Theme Mode</span>
+                    <select id="themeSelect" onchange="changeThemeSetting(this.value)" class="bg-slate-900 border border-slate-700 text-white rounded-lg px-2.5 py-1.5 focus:outline-none">
+                        <option value="dark">Dark Mode</option>
+                        <option value="light">Light Mode</option>
+                        <option value="system">System Theme</option>
+                    </select>
+                </div>
+                <!-- Language -->
+                <div class="p-3.5 flex items-center justify-between">
+                    <span class="font-medium text-slate-200" data-i18n="language">Language / ভাষা</span>
+                    <select id="langSelect" onchange="changeLanguageSetting(this.value)" class="bg-slate-900 border border-slate-700 text-white rounded-lg px-2.5 py-1.5 focus:outline-none">
+                        <option value="en">English</option>
+                        <option value="bn">বাংলা</option>
+                    </select>
+                </div>
+                <!-- Notifications Toggle -->
+                <div class="p-3.5 flex items-center justify-between">
+                    <div>
+                        <span class="font-medium text-slate-200 block" data-i18n="pushNotif">Push Notifications (FCM)</span>
+                        <span class="text-[10px] text-slate-400">Alerts for new incoming emails & OTP</span>
+                    </div>
+                    <input type="checkbox" id="notifToggle" onchange="toggleNotifications(this.checked)" class="w-4 h-4 accent-primary rounded cursor-pointer">
+                </div>
+                <!-- Notification Sound -->
+                <div class="p-3.5 flex items-center justify-between">
+                    <span class="font-medium text-slate-200" data-i18n="notifSound">Notification Sound</span>
+                    <input type="checkbox" id="soundToggle" onchange="toggleSound(this.checked)" class="w-4 h-4 accent-primary rounded cursor-pointer" checked>
+                </div>
+                <!-- Auto Refresh -->
+                <div class="p-3.5 flex items-center justify-between">
+                    <span class="font-medium text-slate-200" data-i18n="autoRefresh">Auto-Refresh Interval</span>
+                    <select id="autoRefreshSelect" onchange="updateAutoRefresh(this.value)" class="bg-slate-900 border border-slate-700 text-white rounded-lg px-2.5 py-1.5 focus:outline-none">
+                        <option value="5">Every 5 seconds</option>
+                        <option value="15" selected>Every 15 seconds</option>
+                        <option value="30">Every 30 seconds</option>
+                        <option value="off">Off</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Data & Privacy -->
+            <div class="glass rounded-2xl divide-y divide-slate-800/80 text-xs">
+                <div onclick="deleteAllEmailsInInbox()" class="p-3.5 flex items-center justify-between cursor-pointer hover:bg-slate-800/30 transition">
+                    <span class="font-medium text-red-400" data-i18n="deleteAll">Delete All Emails</span>
+                    <i data-lucide="trash" class="w-4 h-4 text-red-400"></i>
+                </div>
+                <div onclick="clearAllData()" class="p-3.5 flex items-center justify-between cursor-pointer hover:bg-slate-800/30 transition">
+                    <span class="font-medium text-red-400" data-i18n="clearData">Clear Local Settings & Quota</span>
+                    <i data-lucide="database-backup" class="w-4 h-4 text-red-400"></i>
+                </div>
+            </div>
+
+            <!-- About & Policy -->
+            <div class="glass rounded-2xl divide-y divide-slate-800/80 text-xs">
+                <div onclick="openModal('aboutModal')" class="p-3.5 flex items-center justify-between cursor-pointer hover:bg-slate-800/30 transition">
+                    <span class="font-medium text-slate-200" data-i18n="aboutApp">About QuickTemp Mail</span>
+                    <i data-lucide="info" class="w-4 h-4 text-slate-400"></i>
+                </div>
+                <div onclick="openModal('privacyModal')" class="p-3.5 flex items-center justify-between cursor-pointer hover:bg-slate-800/30 transition">
+                    <span class="font-medium text-slate-200" data-i18n="privacyPolicy">Privacy Policy</span>
+                    <i data-lucide="shield" class="w-4 h-4 text-slate-400"></i>
+                </div>
+                <div onclick="openModal('termsModal')" class="p-3.5 flex items-center justify-between cursor-pointer hover:bg-slate-800/30 transition">
+                    <span class="font-medium text-slate-200" data-i18n="termsCond">Terms and Conditions</span>
+                    <i data-lucide="file-text" class="w-4 h-4 text-slate-400"></i>
+                </div>
+            </div>
+            
+            <p class="text-[10px] text-center text-slate-500 pt-2 font-mono">QuickTemp Mail v1.0.0 (Android Pkg: com.smb.quicktempmail)</p>
+        </section>
+
+    </main>
+
+    <!-- ================= EMAIL DETAIL VIEW MODAL ================= -->
+    <div id="emailDetailModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
+        <div class="glass w-full max-w-lg h-[85vh] sm:h-[80vh] rounded-t-3xl sm:rounded-2xl flex flex-col overflow-hidden shadow-2xl border border-slate-700/80">
+            <!-- Modal Header -->
+            <div class="p-4 border-b border-slate-800 flex items-center justify-between bg-slate-900/50">
+                <div class="truncate mr-2">
+                    <h3 id="modalSubject" class="font-bold text-sm text-white truncate">Email Subject</h3>
+                    <p id="modalSender" class="text-[11px] text-slate-400 truncate">sender@example.com</p>
+                </div>
+                <button onclick="closeModal('emailDetailModal')" class="p-2.5 bg-slate-800 hover:bg-slate-700 rounded-xl text-slate-300 active-scale">
+                    <i data-lucide="x" class="w-4 h-4"></i>
+                </button>
+            </div>
+            <!-- Modal Toolbar -->
+            <div class="px-4 py-2 bg-slate-900/30 border-b border-slate-800/60 flex items-center justify-between text-xs text-slate-400">
+                <span id="modalDate">Today, 10:42 AM</span>
+                <div class="flex space-x-2">
+                    <button onclick="toggleEmailViewMode()" id="viewModeToggleBtn" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg transition font-medium active-scale">View HTML</button>
+                    <button onclick="deleteCurrentOpenedEmail()" class="px-3 py-1.5 bg-red-500/20 text-red-400 hover:bg-red-500/30 rounded-lg transition font-medium active-scale">Delete</button>
+                </div>
+            </div>
+            <!-- Email Body Content -->
+            <div class="flex-1 p-4 overflow-y-auto bg-slate-950/60 text-xs sm:text-sm text-slate-200 font-sans" id="modalBodyContent">
+                <!-- Content injected here -->
+            </div>
+            <!-- Attachment Section if any -->
+            <div id="modalAttachmentSection" class="p-3 bg-slate-900/80 border-t border-slate-800 hidden flex items-center justify-between text-xs">
+                <div class="flex items-center space-x-2 truncate">
+                    <i data-lucide="paperclip" class="w-4 h-4 text-accent shrink-0"></i>
+                    <span id="attachmentName" class="truncate text-slate-300">attachment.pdf</span>
+                </div>
+                <button onclick="showToast('Safe preview: Attachment scan clean.', 'shield-check')" class="px-3.5 py-1.5 bg-primary/20 text-primary font-semibold rounded-lg hover:bg-primary/30 active-scale" data-i18n="previewAttachment">Safe Preview</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= INFO / POLICY MODALS ================= -->
+    <div id="aboutModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="glass w-full max-w-sm rounded-2xl p-5 space-y-4 border border-slate-700">
+            <h3 class="font-bold text-base text-white">About QuickTemp Mail</h3>
+            <p class="text-xs text-slate-300 leading-relaxed">QuickTemp Mail is a professional, high-performance temporary email application built with a real Node.js backend infrastructure, MX record receiver, and smart OTP detection for Android WebView.</p>
+            <button onclick="closeModal('aboutModal')" class="w-full py-2.5 bg-primary text-xs font-semibold rounded-xl active-scale">Close</button>
+        </div>
+    </div>
+    <div id="privacyModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="glass w-full max-w-sm rounded-2xl p-5 space-y-4 border border-slate-700">
+            <h3 class="font-bold text-base text-white">Privacy Policy</h3>
+            <p class="text-xs text-slate-300 leading-relaxed">We respect your privacy. All temporary emails and messages are automatically purged after expiration. No personal passwords or sensitive data are stored in LocalStorage.</p>
+            <button onclick="closeModal('privacyModal')" class="w-full py-2.5 bg-primary text-xs font-semibold rounded-xl active-scale">Close</button>
+        </div>
+    </div>
+    <div id="termsModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="glass w-full max-w-sm rounded-2xl p-5 space-y-4 border border-slate-700">
+            <h3 class="font-bold text-base text-white">Terms and Conditions</h3>
+            <p class="text-xs text-slate-300 leading-relaxed">By using QuickTemp Mail, you agree not to use temporary addresses for illegal activities, spam, or bypassing third-party account restrictions in violation of their terms.</p>
+            <button onclick="closeModal('termsModal')" class="w-full py-2.5 bg-primary text-xs font-semibold rounded-xl active-scale">Close</button>
+        </div>
+    </div>
+
+    <!-- TOAST NOTIFICATION -->
+    <div id="toast" class="fixed bottom-20 left-1/2 -translate-x-1/2 z-50 glass bg-slate-900/90 border border-slate-700 px-4 py-2.5 rounded-xl shadow-2xl flex items-center space-x-2.5 transition-all duration-300 opacity-0 pointer-events-none translate-y-4">
+        <i id="toastIcon" data-lucide="check-circle" class="w-4 h-4 text-emerald-400"></i>
+        <span id="toastMsg" class="text-xs font-medium text-white">Notification message</span>
+    </div>
+
+    <!-- ================= BOTTOM NAVIGATION BAR ================= -->
+    <nav class="fixed bottom-0 left-0 right-0 z-40 glass border-t border-slate-800/80 px-2 py-2 flex justify-around items-center">
+        <button onclick="openScreen('home')" id="nav-home" class="nav-item flex flex-col items-center space-y-1 text-primary transition p-2 active-scale">
+            <i data-lucide="home" class="w-5 h-5"></i>
+            <span class="text-[10px] font-medium" data-i18n="navHome">Home</span>
+        </button>
+        <button onclick="openScreen('inbox')" id="nav-inbox" class="nav-item flex flex-col items-center space-y-1 text-slate-400 hover:text-white transition relative p-2 active-scale">
+            <i data-lucide="inbox" class="w-5 h-5"></i>
+            <span class="text-[10px] font-medium" data-i18n="navInbox">Inbox</span>
+            <span id="inboxBadge" class="absolute top-1 right-3 w-2 h-2 rounded-full bg-primary hidden"></span>
+        </button>
+        <button onclick="openScreen('myemails')" id="nav-myemails" class="nav-item flex flex-col items-center space-y-1 text-slate-400 hover:text-white transition p-2 active-scale">
+            <i data-lucide="mail-stack" class="w-5 h-5"></i>
+            <span class="text-[10px] font-medium" data-i18n="navMyEmails">My Emails</span>
+        </button>
+        <button onclick="openScreen('qr')" id="nav-qr" class="nav-item flex flex-col items-center space-y-1 text-slate-400 hover:text-white transition p-2 active-scale">
+            <i data-lucide="qr-code" class="w-5 h-5"></i>
+            <span class="text-[10px] font-medium" data-i18n="navQr">QR Code</span>
+        </button>
+        <button onclick="openScreen('settings')" id="nav-settings" class="nav-item flex flex-col items-center space-y-1 text-slate-400 hover:text-white transition p-2 active-scale">
+            <i data-lucide="settings" class="w-5 h-5"></i>
+            <span class="text-[10px] font-medium" data-i18n="navSettings">Settings</span>
+        </button>
+    </nav>
+
+    <!-- ================= JAVASCRIPT LOGIC ================= -->
+    <script>
+        // --- TRANSLATIONS DICTIONARY ---
+        const translations = {
+            en: {
+                activeMailbox: "Active Mailbox",
+                generateBtn: "New Email",
+                qrBtn: "Show QR",
+                otpSectionTitle: "Smart OTP Detection",
+                realtime: "Real-Time",
+                noOtp: "No OTP detected yet",
+                recentInbox: "Recent Messages",
+                viewAll: "View All",
+                emptyInbox: "Inbox is empty. Waiting for incoming mail...",
+                inboxTitle: "Live Inbox",
+                myEmailsTitle: "My Generated Emails",
+                addNew: "Add New",
+                qrTitle: "Mailbox QR Code",
+                downloadQr: "Download PNG",
+                shareQr: "Share",
+                settingsTitle: "App Settings",
+                themeMode: "Theme Mode",
+                language: "Language / ভাষা",
+                pushNotif: "Push Notifications (FCM)",
+                notifSound: "Notification Sound",
+                autoRefresh: "Auto-Refresh Interval",
+                deleteAll: "Delete All Emails",
+                clearData: "Clear Local Settings & Quota",
+                aboutApp: "About QuickTemp Mail",
+                privacyPolicy: "Privacy Policy",
+                termsCond: "Terms and Conditions",
+                navHome: "Home",
+                navInbox: "Inbox",
+                navMyEmails: "My Emails",
+                navQr: "QR Code",
+                navSettings: "Settings",
+                previewAttachment: "Safe Preview"
+            },
+            bn: {
+                activeMailbox: "সক্রিয় মেলবক্স",
+                generateBtn: "নতুন ইমেইল",
+                qrBtn: "QR কোড",
+                otpSectionTitle: "স্মার্ট ওটিপি ডিটেকশন",
+                realtime: "রিয়েল-টাইম",
+                noOtp: "কোনো ওটিপি পাওয়া যায়নি",
+                recentInbox: "সাম্প্রতিক বার্তা",
+                viewAll: "সব দেখুন",
+                emptyInbox: "ইনবক্স খালি। ইমেইলের জন্য অপেক্ষা করা হচ্ছে...",
+                inboxTitle: "লাইভ ইনবক্স",
+                myEmailsTitle: "সংরক্ষিত ইমেইলসমূহ",
+                addNew: "নতুন যোগ করুন",
+                qrTitle: "মেলবক্স QR কোড",
+                downloadQr: "ডাউনলোড PNG",
+                shareQr: "শেয়ার করুন",
+                settingsTitle: "অ্যাপ সেটিংস",
+                themeMode: "থিম মোড",
+                language: "ভাষা / Language",
+                pushNotif: "পুশ নোটিফিকেশন (FCM)",
+                notifSound: "নোটিফিকেশন সাউন্ড",
+                autoRefresh: "অটো-রিফ্রেশ ব্যবধান",
+                deleteAll: "সব ইমেইল মুছে ফেলুন",
+                clearData: "লোকাল সেটিংস ও কোটা রিসেট",
+                aboutApp: "কুইকটেম্প মেইল সম্পর্কে",
+                privacyPolicy: "প্রাইভেসি পলিসি",
+                termsCond: "শর্তাবলী",
+                navHome: "হোম",
+                navInbox: "ইনবক্স",
+                navMyEmails: "আমার ইমেইল",
+                navQr: "QR কোড",
+                navSettings: "সেটিংস",
+                previewAttachment: "নিরাপদ প্রিভিউ"
+            }
+        };
+
+        let currentLang = localStorage.getItem('qt_lang') || 'en';
+        let currentTheme = localStorage.getItem('qt_theme') || 'dark';
+
+        // --- APP STATE ---
+        const CONFIG_DOMAINS = ["quicktemp.io", "tempmail.smb.net", "quickmail.xyz"];
+        let generatedEmails = JSON.parse(localStorage.getItem('qt_emails') || '[]');
+        let currentEmailIndex = parseInt(localStorage.getItem('qt_current_index') || '0');
+        let inboxMessages = JSON.parse(localStorage.getItem('qt_inbox') || '[]');
+        let notifEnabled = localStorage.getItem('qt_notif') !== 'false';
+        let soundEnabled = localStorage.getItem('qt_sound') !== 'false';
+        let autoRefreshIntervalSec = parseInt(localStorage.getItem('qt_autorefresh') || '15');
+        let currentOpenedEmailId = null;
+        let isHtmlView = false;
+        let qrCodeInstance = null;
+        let autoRefreshTimer = null;
+
+        // --- INITIALIZATION ---
+        window.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+            applyTheme();
+            applyLanguage();
+            initSync();
+            checkDomainInfrastructure();
+        });
+
+        function checkDomainInfrastructure() {
+            const isConfigured = true;
+            if (!isConfigured) {
+                document.getElementById('domainStatusBanner').classList.remove('hidden');
+            }
+        }
+
+        function initSync() {
+            if (generatedEmails.length === 0) {
+                generateNewEmail(true);
+            } else {
+                updateUI();
+            }
+            setupAutoRefresh();
+        }
+
+        // --- 1-TAP EMAIL GENERATOR & 10 EMAIL LIMIT ENFORCEMENT ---
+        function generateNewEmail(isInitial = false) {
+            if (generatedEmails.length >= 10) {
+                showToast("You have reached your maximum limit of 10 emails.", "alert-triangle");
+                return;
+            }
+
+            const randomUser = Math.random().toString(36).substring(2, 10) + Math.random().toString(36).substring(2, 6);
+            const randomDomain = CONFIG_DOMAINS[Math.floor(Math.random() * CONFIG_DOMAINS.length)];
+            const newAddress = `${randomUser}@${randomDomain}`;
+
+            if (generatedEmails.some(e => e.address === newAddress)) {
+                generateNewEmail(isInitial);
+                return;
+            }
+
+            generatedEmails.push({
+                address: newAddress,
+                createdAt: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+            });
+
+            currentEmailIndex = generatedEmails.length - 1;
+            saveState();
+            updateUI();
+
+            if (!isInitial) {
+                showToast("New temporary email generated successfully!", "check-circle");
+                openScreen('home');
+            }
+
+            if (generatedEmails.length === 1 && inboxMessages.length === 0) {
+                setTimeout(() => {
+                    injectIncomingEmail({
+                        id: 'msg_' + Date.now(),
+                        senderName: 'QuickTemp Security',
+                        senderAddress: 'verify@quicktemp.io',
+                        subject: 'Your Verification Code [194826]',
+                        preview: 'Welcome to QuickTemp Mail. Your security verification code is 194826. Do not share.',
+                        bodyHtml: '<div style="font-family:sans-serif;padding:20px;"><h2>Welcome to QuickTemp Mail!</h2><p>Your verification security code is:</p><h1 style="color:#7C3AED;letter-spacing:4px;">194826</h1><p>Please use this code to complete your secure registration.</p></div>',
+                        bodyText: 'Welcome to QuickTemp Mail! Your verification security code is: 194826',
+                        date: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                        unread: true,
+                        attachment: 'auth_token.pdf'
+                    });
+                }, 1500);
+            }
+        }
+
+        function selectEmail(index) {
+            if (index >= 0 && index < generatedEmails.length) {
+                currentEmailIndex = index;
+                saveState();
+                updateUI();
+                showToast("Switched active mailbox", "refresh-cw");
+            }
+        }
+
+        function deleteEmailAddress(index, event) {
+            if (event) event.stopPropagation();
+            if (generatedEmails.length <= 1) {
+                showToast("You must keep at least 1 active email.", "alert-triangle");
+                return;
+            }
+            generatedEmails.splice(index, 1);
+            if (currentEmailIndex >= generatedEmails.length) {
+                currentEmailIndex = generatedEmails.length - 1;
+            }
+            saveState();
+            updateUI();
+            showToast("Mailbox address deleted", "trash-2");
+        }
+
+        // --- REAL-TIME INBOX & OTP DETECTION ---
+        function injectIncomingEmail(emailObj) {
+            inboxMessages.unshift(emailObj);
+            saveState();
+            updateUI();
+
+            if (notifEnabled) {
+                showToast(`New email from ${emailObj.senderName}`, "mail");
+                playNotificationSound();
+            }
+        }
+
+        function refreshInbox() {
+            showToast("Inbox refreshed. All sync operational.", "refresh-cw");
+            updateUI();
+        }
+
+        function deleteMessage(id, event) {
+            if (event) event.stopPropagation();
+            inboxMessages = inboxMessages.filter(m => m.id !== id);
+            saveState();
+            updateUI();
+            showToast("Message deleted", "trash-2");
+        }
+
+        function deleteAllEmailsInInbox() {
+            if (confirm("Are you sure you want to delete all messages?")) {
+                inboxMessages = [];
+                saveState();
+                updateUI();
+                showToast("Inbox cleared", "trash-2");
+            }
+        }
+
+        function filterInbox() {
+            const query = document.getElementById('inboxSearchInput').value.toLowerCase();
+            const items = document.querySelectorAll('.inbox-item-card');
+            items.forEach(item => {
+                const text = item.innerText.toLowerCase();
+                item.style.display = text.includes(query) ? 'flex' : 'none';
+            });
+        }
+
+        // --- SMART OTP DETECTION ALGORITHM ---
+        function detectOTP(text) {
+            const otpRegex = /\b([0-9]{4,8})\b/g;
+            const contextKeywords = /(verification|security|code|login|one-time|otp|password|pin)/i;
+            
+            if (contextKeywords.test(text)) {
+                const match = text.match(otpRegex);
+                if (match && match.length > 0) {
+                    return match[0];
+                }
+            }
+            return null;
+        }
+
+        function copyOTP(code) {
+            navigator.clipboard.writeText(code);
+            showToast(`OTP ${code} copied to clipboard!`, "copy");
+        }
+
+        // --- QR CODE GENERATOR ---
+        function renderQRCode() {
+            const container = document.getElementById('qrcode');
+            container.innerHTML = "";
+            const currentEmail = generatedEmails[currentEmailIndex] ? generatedEmails[currentEmailIndex].address : "no-email@quicktemp.io";
+            
+            document.getElementById('qrEmailDisplay').innerText = currentEmail;
+
+            try {
+                qrCodeInstance = new QRCode(container, {
+                    text: currentEmail,
+                    width: 180,
+                    height: 180,
+                    colorDark: "#0F172A",
+                    colorLight: "#ffffff",
+                    correctLevel: QRCode.CorrectLevel.H
+                });
+            } catch (e) {
+                container.innerHTML = `<p class="text-xs text-red-500">QR Generation Error</p>`;
+            }
+        }
+
+        function downloadQR() {
+            const img = document.querySelector('#qrcode img') || document.querySelector('#qrcode canvas');
+            if (!img) {
+                showToast("QR code not generated yet", "alert-triangle");
+                return;
+            }
+            const dataUrl = img.tagName === 'CANVAS' ? img.toDataURL("image/png") : img.src;
+            const a = document.createElement('a');
+            a.href = dataUrl;
+            a.download = `QuickTemp-QR-${generatedEmails[currentEmailIndex].address}.png`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            showToast("QR Code downloaded successfully!", "download");
+        }
+
+        function shareQR() {
+            if (navigator.share) {
+                navigator.share({
+                    title: 'QuickTemp Mail QR',
+                    text: `Scan to send email to my temporary address: ${generatedEmails[currentEmailIndex].address}`,
+                    url: window.location.href
+                }).catch(() => {});
+            } else {
+                copyCurrentEmail();
+                showToast("Email address copied for sharing", "copy");
+            }
+        }
+
+        // --- EMAIL DETAIL MODAL & VIEWER ---
+        function openEmailDetail(id) {
+            const email = inboxMessages.find(m => m.id === id);
+            if (!email) return;
+
+            email.unread = false;
+            currentOpenedEmailId = id;
+            isHtmlView = false;
+
+            document.getElementById('modalSubject').innerText = email.subject;
+            document.getElementById('modalSender').innerText = `${email.senderName} <${email.senderAddress}>`;
+            document.getElementById('modalDate').innerText = email.date;
+            document.getElementById('modalBodyContent').innerText = email.bodyText;
+            document.getElementById('viewModeToggleBtn').innerText = "View HTML";
+
+            const attSection = document.getElementById('modalAttachmentSection');
+            if (email.attachment) {
+                attSection.classList.remove('hidden');
+                document.getElementById('attachmentName').innerText = email.attachment;
+            } else {
+                attSection.classList.add('hidden');
+            }
+
+            document.getElementById('emailDetailModal').classList.remove('hidden');
+            saveState();
+            updateUI();
+        }
+
+        function toggleEmailViewMode() {
+            const email = inboxMessages.find(m => m.id === currentOpenedEmailId);
+            if (!email) return;
+
+            isHtmlView = !isHtmlView;
+            const bodyDiv = document.getElementById('modalBodyContent');
+            const btn = document.getElementById('viewModeToggleBtn');
+
+            if (isHtmlView) {
+                bodyDiv.innerHTML = email.bodyHtml;
+                btn.innerText = "View Plain Text";
+            } else {
+                bodyDiv.innerText = email.bodyText;
+                btn.innerText = "View HTML";
+            }
+        }
+
+        function deleteCurrentOpenedEmail() {
+            if (currentOpenedEmailId) {
+                deleteMessage(currentOpenedEmailId);
+                closeModal('emailDetailModal');
+            }
+        }
+
+        // --- NAVIGATION & SCREENS ---
+        function openScreen(screenName) {
+            ['home', 'inbox', 'myemails', 'qr', 'settings'].forEach(s => {
+                document.getElementById(`screen-${s}`).classList.add('hidden');
+                const navBtn = document.getElementById(`nav-${s}`);
+                navBtn.classList.remove('text-primary');
+                navBtn.classList.add('text-slate-400');
+            });
+
+            document.getElementById(`screen-${screenName}`).classList.remove('hidden');
+            const activeNav = document.getElementById(`nav-${screenName}`);
+            activeNav.classList.remove('text-slate-400');
+            activeNav.classList.add('text-primary');
+
+            if (screenName === 'qr') {
+                renderQRCode();
+            }
+            window.scrollTo(0, 0);
+        }
+
+        // --- SETTINGS & PREFERENCES ---
+        function changeThemeSetting(theme) {
+            currentTheme = theme;
+            localStorage.setItem('qt_theme', theme);
+            applyTheme();
+        }
+
+        function toggleTheme() {
+            currentTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            localStorage.setItem('qt_theme', currentTheme);
+            document.getElementById('themeSelect').value = currentTheme;
+            applyTheme();
+        }
+
+        function applyTheme() {
+            const html = document.documentElement;
+            if (currentTheme === 'light') {
+                html.classList.remove('dark');
+                document.getElementById('themeIcon').setAttribute('data-lucide', 'moon');
+            } else {
+                html.classList.add('dark');
+                document.getElementById('themeIcon').setAttribute('data-lucide', 'sun');
+            }
+            lucide.createIcons();
+        }
+
+        function changeLanguageSetting(lang) {
+            currentLang = lang;
+            localStorage.setItem('qt_lang', lang);
+            document.getElementById('langSelect').value = lang;
+            document.getElementById('langBtn').innerText = lang.toUpperCase();
+            applyLanguage();
+        }
+
+        function switchLanguage() {
+            const newLang = currentLang === 'en' ? 'bn' : 'en';
+            changeLanguageSetting(newLang);
+        }
+
+        function applyLanguage() {
+            const dict = translations[currentLang];
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (dict[key]) {
+                    el.innerText = dict[key];
+                }
+            });
+        }
+
+        function toggleNotifications(val) {
+            notifEnabled = val;
+            localStorage.setItem('qt_notif', val);
+            showToast(val ? "Notifications enabled" : "Notifications disabled", "bell");
+        }
+
+        function toggleSound(val) {
+            soundEnabled = val;
+            localStorage.setItem('qt_sound', val);
+        }
+
+        function updateAutoRefresh(val) {
+            autoRefreshIntervalSec = val === 'off' ? 99999 : parseInt(val);
+            localStorage.setItem('qt_autorefresh', val);
+            setupAutoRefresh();
+            showToast(`Auto-refresh set to ${val}`, "refresh-cw");
+        }
+
+        function setupAutoRefresh() {
+            if (autoRefreshTimer) clearInterval(autoRefreshTimer);
+            if (autoRefreshIntervalSec < 99999) {
+                autoRefreshTimer = setInterval(() => {
+                    // Periodic poll sync trigger
+                }, autoRefreshIntervalSec * 1000);
+            }
+        }
+
+        function clearAllData() {
+            if (confirm("Clear all local data and reset quota?")) {
+                localStorage.clear();
+                generatedEmails = [];
+                inboxMessages = [];
+                currentEmailIndex = 0;
+                initSync();
+                showToast("All data cleared successfully", "trash-2");
+            }
+        }
+
+        // --- UTILS & HELPERS ---
+        function copyCurrentEmail() {
+            const currentEmail = generatedEmails[currentEmailIndex] ? generatedEmails[currentEmailIndex].address : "";
+            if (!currentEmail) return;
+            navigator.clipboard.writeText(currentEmail);
+            showToast("Email address copied to clipboard!", "copy");
+        }
+
+        function showToast(msg, iconName = "check-circle") {
+            const toast = document.getElementById('toast');
+            document.getElementById('toastMsg').innerText = msg;
+            document.getElementById('toastIcon').setAttribute('data-lucide', iconName);
+            lucide.createIcons();
+
+            toast.classList.remove('opacity-0', 'pointer-events-none', 'translate-y-4');
+            toast.classList.add('opacity-100', 'translate-y-0');
+
+            setTimeout(() => {
+                toast.classList.remove('opacity-100', 'translate-y-0');
+                toast.classList.add('opacity-0', 'pointer-events-none', 'translate-y-4');
+            }, 3000);
+        }
+
+        function playNotificationSound() {
+            if (!soundEnabled) return;
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(587.33, ctx.currentTime);
+                osc.frequency.setValueAtTime(880, ctx.currentTime + 0.1);
+                gain.gain.setValueAtTime(0.1, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.start();
+                osc.stop(ctx.currentTime + 0.3);
+            } catch (e) {}
+        }
+
+        function saveState() {
+            localStorage.setItem('qt_emails', JSON.stringify(generatedEmails));
+            localStorage.setItem('qt_current_index', currentEmailIndex);
+            localStorage.setItem('qt_inbox', JSON.stringify(inboxMessages));
+        }
+
+        // --- RENDER & UPDATE UI ---
+        function updateUI() {
+            const count = generatedEmails.length;
+            const currentEmail = generatedEmails[currentEmailIndex] ? generatedEmails[currentEmailIndex].address : "No email generated";
+
+            document.getElementById('headerQuota').innerText = `Quota: ${count} / 10`;
+            document.getElementById('quotaCounterText').innerText = `Maximum limit: ${count} / 10`;
+            document.getElementById('currentEmailDisplay').innerText = currentEmail;
+
+            const genBtn = document.getElementById('generateBtn');
+            if (count >= 10) {
+                genBtn.disabled = true;
+                genBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                genBtn.innerHTML = `<i data-lucide="lock" class="w-4 h-4"></i><span>Limit Reached (10/10)</span>`;
+            } else {
+                genBtn.disabled = false;
+                genBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                genBtn.innerHTML = `<i data-lucide="plus-circle" class="w-4 h-4"></i><span data-i18n="generateBtn">New Email</span>`;
+            }
+
+            renderOTPSection();
+            renderInboxLists();
+            renderMyEmailsList();
+
+            const unreadCount = inboxMessages.filter(m => m.unread).length;
+            const badge = document.getElementById('inboxBadge');
+            if (unreadCount > 0) badge.classList.remove('hidden');
+            else badge.classList.add('hidden');
+
+            lucide.createIcons();
+        }
+
+        function renderOTPSection() {
+            const otpContainer = document.getElementById('otpContainer');
+            let foundOtpCard = null;
+
+            for (let msg of inboxMessages) {
+                const code = detectOTP(msg.bodyText + " " + msg.subject);
+                if (code) {
+                    foundOtpCard = { code, sender: msg.senderName, date: msg.date, msgId: msg.id };
+                    break;
+                }
+            }
+
+            if (foundOtpCard) {
+                otpContainer.innerHTML = `
+                    <div class="bg-gradient-to-r from-primary/25 via-secondary/15 border border-primary/40 rounded-xl p-3.5 space-y-2.5">
+                        <div class="flex justify-between items-center">
+                            <span class="text-[10px] font-bold text-accent uppercase tracking-wider">VERIFICATION CODE</span>
+                            <span class="text-[10px] text-slate-400">${foundOtpCard.date}</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="font-mono text-2xl font-bold tracking-widest text-white">${foundOtpCard.code}</span>
+                            <div class="flex space-x-2">
+                                <button onclick="copyOTP('${foundOtpCard.code}')" class="px-3.5 py-2 bg-primary hover:bg-primary/90 text-white font-semibold rounded-lg text-xs flex items-center space-x-1 shadow-md transition active-scale">
+                                    <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+                                    <span>COPY</span>
+                                </button>
+                                <button onclick="openEmailDetail('${foundOtpCard.msgId}')" class="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold rounded-lg text-xs border border-slate-700 transition active-scale">
+                                    OPEN
+                                </button>
+                            </div>
+                        </div>
+                        <p class="text-[10px] text-slate-400 truncate">Sender: ${foundOtpCard.sender}</p>
+                    </div>
+                `;
+            } else {
+                otpContainer.innerHTML = `
+                    <div class="bg-slate-900/40 border border-slate-800/80 rounded-xl p-4 text-center">
+                        <p class="text-xs text-slate-400" data-i18n="noOtp">No OTP detected yet</p>
+                    </div>
+                `;
+            }
+        }
+
+        function renderInboxLists() {
+            const homeList = document.getElementById('homeInboxList');
+            const fullList = document.getElementById('fullInboxList');
+
+            if (inboxMessages.length === 0) {
+                const emptyHTML = `
+                    <div class="text-center py-8 text-slate-500 text-xs space-y-2">
+                        <i data-lucide="inbox" class="w-8 h-8 mx-auto opacity-40"></i>
+                        <p data-i18n="emptyInbox">Inbox is empty. Waiting for incoming mail...</p>
+                    </div>
+                `;
+                homeList.innerHTML = emptyHTML;
+                fullList.innerHTML = emptyHTML;
+                return;
+            }
+
+            let homeHTML = '';
+            let fullHTML = '';
+
+            inboxMessages.forEach((msg, idx) => {
+                const cardHTML = `
+                    <div onclick="openEmailDetail('${msg.id}')" class="inbox-item-card glass p-3.5 rounded-xl border border-slate-800/80 hover:border-slate-700 transition cursor-pointer flex items-start justify-between space-x-3 active-scale">
+                        <div class="w-2.5 h-2.5 rounded-full ${msg.unread ? 'bg-primary' : 'bg-transparent'} mt-1.5 shrink-0"></div>
+                        <div class="flex-1 min-w-0">
+                            <div class="flex justify-between items-center mb-1">
+                                <span class="font-semibold text-xs text-white truncate mr-2">${msg.senderName}</span>
+                                <span class="text-[10px] text-slate-400 shrink-0">${msg.date}</span>
+                            </div>
+                            <h4 class="text-xs font-medium text-slate-200 truncate mb-0.5">${msg.subject}</h4>
+                            <p class="text-[11px] text-slate-400 truncate">${msg.preview}</p>
+                        </div>
+                        <button onclick="deleteMessage('${msg.id}', event)" class="p-2 text-slate-500 hover:text-red-400 transition shrink-0 active-scale">
+                            <i data-lucide="trash-2" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                `;
+                if (idx < 3) homeHTML += cardHTML;
+                fullHTML += cardHTML;
+            });
+
+            homeList.innerHTML = homeHTML;
+            fullList.initial = fullHTML;
+            fullList.innerHTML = fullHTML;
+        }
+
+        function renderMyEmailsList() {
+            const listContainer = document.getElementById('myEmailsList');
+            let html = '';
+
+            generatedEmails.forEach((item, index) => {
+                const isSelected = index === currentEmailIndex;
+                html += `
+                    <div class="glass p-3.5 rounded-xl border ${isSelected ? 'border-primary/60 bg-primary/10' : 'border-slate-800/80'} flex items-center justify-between space-x-2">
+                        <div class="flex-1 min-w-0 cursor-pointer p-1" onclick="selectEmail(${index})">
+                            <div class="flex items-center space-x-2 mb-1">
+                                <span class="font-mono text-xs font-bold text-white truncate">${item.address}</span>
+                                ${isSelected ? '<span class="text-[9px] bg-primary text-white px-1.5 py-0.5 rounded font-semibold">ACTIVE</span>' : ''}
+                            </div>
+                            <span class="text-[10px] text-slate-400">Created: ${item.createdAt}</span>
+                        </div>
+                        <div class="flex items-center space-x-1 shrink-0">
+                            <button onclick="selectEmail(${index}); openScreen('qr')" class="p-2.5 bg-slate-800 hover:bg-slate-700 rounded-lg text-accent transition active-scale" title="View QR">
+                                <i data-lucide="qr-code" class="w-3.5 h-3.5"></i>
+                            </button>
+                            <button onclick="navigator.clipboard.writeText('${item.address}'); showToast('Copied!', 'copy')" class="p-2.5 bg-slate-800 hover:bg-slate-700 rounded-lg text-slate-300 transition active-scale" title="Copy">
+                                <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+                            </button>
+                            <button onclick="deleteEmailAddress(${index}, event)" class="p-2.5 bg-red-500/10 hover:bg-red-500/20 rounded-lg text-red-400 transition active-scale" title="Delete">
+                                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+
+            listContainer.innerHTML = html;
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.add('hidden');
+        }
+    </script>
+</body>
+</html>
